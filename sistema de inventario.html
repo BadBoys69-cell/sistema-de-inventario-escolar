@@ -249,6 +249,115 @@
             color: #e74c3c;
         }
 
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-container {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-container h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .login-container p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-form label {
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .login-form input {
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-form button {
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .logout-btn {
+            margin-top: 0;
+            align-self: flex-end;
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
         @media (max-width: 768px) {
             .controls {
                 grid-template-columns: 1fr 1fr;
@@ -261,14 +370,32 @@
             .rooms-grid {
                 grid-template-columns: 1fr;
             }
+
+            .login-container {
+                padding: 40px 25px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="loginScreen" class="login-screen" style="display: flex;">
+        <div class="login-container">
+            <h1>Sistema de Inventário Escolar</h1>
+            <p>Para acessar, insira a senha</p>
+            <div class="login-form">
+                <label for="loginPassword">Senha</label>
+                <input type="password" id="loginPassword" placeholder="Digite a senha">
+                <button onclick="validateLogin()">Entrar</button>
+                <p id="loginError" class="login-error"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="container" style="display: none;">
         <header>
             <h1>📚 Sistema de Inventário Escolar</h1>
             <p>Controle de itens por sala</p>
+            <button onclick="logout()" class="logout-btn">Sair</button>
 
             <div class="controls">
                 <div class="control-group">
@@ -549,6 +676,34 @@
         function saveInventory() {
             localStorage.setItem('schoolInventory', JSON.stringify(inventory));
         }
+
+        function validateLogin() {
+            const password = document.getElementById('loginPassword').value;
+            const errorMsg = document.getElementById('loginError');
+            
+            if (password === '1234') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                errorMsg.classList.remove('show');
+            } else {
+                errorMsg.textContent = 'Senha incorreta! Tente novamente.';
+                errorMsg.classList.add('show');
+                document.getElementById('loginPassword').value = '';
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').classList.remove('show');
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+        }
+
+        document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                validateLogin();
+            }
+        });
 
         renderRooms();
     </script>
