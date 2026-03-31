@@ -1,0 +1,556 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventário Escolar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            align-self: flex-end;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .room-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .room-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .delete-room {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-room:hover {
+            background: #c0392b;
+        }
+
+        .items-list {
+            list-style: none;
+        }
+
+        .item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .item-quantity {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete-item {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-item:hover {
+            background: #c0392b;
+        }
+
+        .no-items {
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .no-rooms {
+            background: white;
+            padding: 60px 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .room-equipment {
+            background: #f0f0f0;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .equipment-status {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .equipment-item {
+            font-weight: 600;
+        }
+
+        .status-working {
+            color: #27ae60;
+        }
+
+        .status-not-working {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .rooms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Sistema de Inventário Escolar</h1>
+            <p>Controle de itens por sala</p>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="roomNumber">Número da Sala</label>
+                    <input type="text" id="roomNumber" placeholder="Ex: 101, Sala A">
+                </div>
+                <div class="control-group">
+                    <label for="itemName">Nome do Item</label>
+                    <input type="text" id="itemName" placeholder="Ex: Cadeira, Mesa">
+                </div>
+                <div class="control-group">
+                    <label for="itemQuantity">Quantidade</label>
+                    <input type="number" id="itemQuantity" placeholder="0" min="1" value="1">
+                </div>
+                <button onclick="addItem()">Adicionar Item</button>
+            </div>
+
+            <div class="controls" style="margin-top: 20px;">
+                <div class="control-group">
+                    <label for="hasAC">Ar-Condicionado</label>
+                    <select id="hasAC">
+                        <option value="não">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="acWorking">AR Funcionando</label>
+                    <select id="acWorking" disabled>
+                        <option value="não">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="hasProjector">Projetor</label>
+                    <select id="hasProjector">
+                        <option value="não">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="projectorWorking">Projetor Funcionando</label>
+                    <select id="projectorWorking" disabled>
+                        <option value="não">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </div>
+                <button onclick="updateRoomEquipment()" style="margin-top: 20px;">Atualizar Equipamentos</button>
+            </div>
+        </header>
+
+        <div class="filters">
+            <h2>🔍 Filtros</h2>
+            <div class="filter-row">
+                <div class="control-group">
+                    <label for="filterRoom">Filtrar por Sala</label>
+                    <input type="text" id="filterRoom" placeholder="Digite o número da sala">
+                </div>
+                <div class="control-group">
+                    <label for="filterItem">Filtrar por Item</label>
+                    <input type="text" id="filterItem" placeholder="Digite o nome do item">
+                </div>
+                <button onclick="applyFilters()">Filtrar</button>
+            </div>
+        </div>
+
+        <div id="roomsContainer" class="rooms-grid"></div>
+    </div>
+
+    <script>
+        let inventory = JSON.parse(localStorage.getItem('schoolInventory')) || {};
+        let equipmentData = JSON.parse(localStorage.getItem('equipmentData')) || {};
+
+        document.getElementById('hasAC').addEventListener('change', function() {
+            document.getElementById('acWorking').disabled = this.value === 'não';
+            if (this.value === 'não') {
+                document.getElementById('acWorking').value = 'não';
+            }
+        });
+
+        document.getElementById('hasProjector').addEventListener('change', function() {
+            document.getElementById('projectorWorking').disabled = this.value === 'não';
+            if (this.value === 'não') {
+                document.getElementById('projectorWorking').value = 'não';
+            }
+        });
+
+        function addItem() {
+            const roomNumber = document.getElementById('roomNumber').value.trim();
+            const itemName = document.getElementById('itemName').value.trim();
+            const itemQuantity = parseInt(document.getElementById('itemQuantity').value) || 1;
+
+            if (!roomNumber || !itemName) {
+                alert('Por favor, preencha o número da sala e o nome do item!');
+                return;
+            }
+
+            if (!inventory[roomNumber]) {
+                inventory[roomNumber] = [];
+            }
+
+            const existingItem = inventory[roomNumber].find(item => 
+                item.name.toLowerCase() === itemName.toLowerCase()
+            );
+
+            if (existingItem) {
+                existingItem.quantity += itemQuantity;
+            } else {
+                inventory[roomNumber].push({ 
+                    name: itemName, 
+                    quantity: itemQuantity 
+                });
+            }
+
+            saveInventory();
+            renderRooms();
+            clearInputs();
+        }
+
+        function deleteItem(room, itemName) {
+            inventory[room] = inventory[room].filter(item => item.name !== itemName);
+            if (inventory[room].length === 0) {
+                delete inventory[room];
+            }
+            saveInventory();
+            renderRooms();
+        }
+
+        function deleteRoom(roomNumber) {
+            if (confirm(`Tem certeza que deseja deletar a sala ${roomNumber}?`)) {
+                delete inventory[roomNumber];
+                saveInventory();
+                renderRooms();
+            }
+        }
+
+        function applyFilters() {
+            const filterRoom = document.getElementById('filterRoom').value.trim().toLowerCase();
+            const filterItem = document.getElementById('filterItem').value.trim().toLowerCase();
+
+            const filtered = {};
+
+            Object.keys(inventory).forEach(room => {
+                if (filterRoom && !room.toString().toLowerCase().includes(filterRoom)) {
+                    return;
+                }
+
+                const filteredItems = inventory[room].filter(item => 
+                    !filterItem || item.name.toLowerCase().includes(filterItem)
+                );
+
+                if (filteredItems.length > 0) {
+                    filtered[room] = filteredItems;
+                }
+            });
+
+            renderRooms(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('filterRoom').value = '';
+            document.getElementById('filterItem').value = '';
+            renderRooms();
+        }
+
+        function renderRooms(rooms = inventory) {
+            const container = document.getElementById('roomsContainer');
+            container.innerHTML = '';
+
+            if (Object.keys(rooms).length === 0) {
+                container.innerHTML = '<div class="no-rooms">Nenhuma sala registrada. Adicione um item para começar!</div>';
+                return;
+            }
+
+            Object.keys(rooms).sort().forEach(roomNumber => {
+                const card = document.createElement('div');
+                card.className = 'room-card';
+
+                const items = rooms[roomNumber];
+                const itemsHTML = items.map(item => `
+                    <li class="item">
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-quantity">Quantidade: ${item.quantity}</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="delete-item" onclick="deleteItem('${roomNumber}', '${item.name}')">Deletar</button>
+                        </div>
+                    </li>
+                `).join('');
+
+                let equipmentHTML = '';
+                if (equipmentData[roomNumber]) {
+                    const eq = equipmentData[roomNumber];
+                    equipmentHTML = `
+                        <div class="room-equipment">
+                            <div class="equipment-status">
+                                <span class="equipment-item">🌬️ Ar-Condicionado:</span>
+                                <span>${eq.hasAC === 'sim' ? `<span class="status-${eq.acWorking === 'sim' ? 'working' : 'not-working'}">✓ ${eq.acWorking === 'sim' ? 'Funcionando' : 'Não Funcionando'}</span>` : 'Não possui'}</span>
+                            </div>
+                            <div class="equipment-status">
+                                <span class="equipment-item">📽️ Projetor:</span>
+                                <span>${eq.hasProjector === 'sim' ? `<span class="status-${eq.projectorWorking === 'sim' ? 'working' : 'not-working'}">✓ ${eq.projectorWorking === 'sim' ? 'Funcionando' : 'Não Funcionando'}</span>` : 'Não possui'}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="room-header">
+                        <div class="room-number">Sala ${roomNumber}</div>
+                        <button class="delete-room" onclick="deleteRoom('${roomNumber}')">Deletar Sala</button>
+                    </div>
+                    ${equipmentHTML}
+                    <ul class="items-list">
+                        ${itemsHTML || '<li class="no-items">Nenhum item nesta sala</li>'}
+                    </ul>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function clearInputs() {
+            document.getElementById('roomNumber').value = '';
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemQuantity').value = '1';
+        }
+
+        function updateRoomEquipment() {
+            const roomNumber = document.getElementById('roomNumber').value.trim();
+
+            if (!roomNumber) {
+                alert('Por favor, selecione uma sala primeiro!');
+                return;
+            }
+
+            if (!inventory[roomNumber]) {
+                alert('Sala não encontrada no inventário!');
+                return;
+            }
+
+            if (!equipmentData[roomNumber]) {
+                equipmentData[roomNumber] = {};
+            }
+
+            equipmentData[roomNumber].hasAC = document.getElementById('hasAC').value;
+            equipmentData[roomNumber].acWorking = document.getElementById('acWorking').value;
+            equipmentData[roomNumber].hasProjector = document.getElementById('hasProjector').value;
+            equipmentData[roomNumber].projectorWorking = document.getElementById('projectorWorking').value;
+
+            localStorage.setItem('equipmentData', JSON.stringify(equipmentData));
+            alert('Equipamentos atualizados com sucesso!');
+            renderRooms();
+        }
+
+        function loadRoomEquipment(roomNumber) {
+            if (equipmentData[roomNumber]) {
+                document.getElementById('hasAC').value = equipmentData[roomNumber].hasAC || 'não';
+                document.getElementById('hasProjector').value = equipmentData[roomNumber].hasProjector || 'não';
+                document.getElementById('acWorking').value = equipmentData[roomNumber].acWorking || 'não';
+                document.getElementById('projectorWorking').value = equipmentData[roomNumber].projectorWorking || 'não';
+                document.getElementById('acWorking').disabled = equipmentData[roomNumber].hasAC === 'não';
+                document.getElementById('projectorWorking').disabled = equipmentData[roomNumber].hasProjector === 'não';
+            } else {
+                document.getElementById('hasAC').value = 'não';
+                document.getElementById('hasProjector').value = 'não';
+                document.getElementById('acWorking').value = 'não';
+                document.getElementById('projectorWorking').value = 'não';
+                document.getElementById('acWorking').disabled = true;
+                document.getElementById('projectorWorking').disabled = true;
+            }
+        }
+
+        document.getElementById('roomNumber').addEventListener('change', function() {
+            loadRoomEquipment(this.value.trim());
+        });
+
+        function saveInventory() {
+            localStorage.setItem('schoolInventory', JSON.stringify(inventory));
+        }
+
+        renderRooms();
+    </script>
+</body>
+</html>
